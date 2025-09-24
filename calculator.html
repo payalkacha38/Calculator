@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elegant Interactive Calculator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background: linear-gradient(-45deg, #1e3c72, #2a5298, #1e3c72, #dfeafe);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
+    color: #fff;
+  }
+
+  @keyframes gradientBG {
+    0% {background-position: 0% 50%;}
+    50% {background-position: 100% 50%;}
+    100% {background-position: 0% 50%;}
+  }
+
+  .calculator {
+    background: rgba(30, 65, 0, 0.85);
+    border-radius: 25px;
+    padding: 30px;
+    width: 320px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .calculator:hover {
+    transform: scale(1.05);
+    box-shadow: 0 15px 50px rgba(243,156,18,0.8);
+  }
+
+  .display {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 20px;
+    font-size: 2rem;
+    text-align: right;
+    margin-bottom: 25px;
+    overflow-x: auto;
+    transition: all 0.2s ease;
+  }
+
+  .buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+  }
+
+  button {
+    padding: 20px;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    background: linear-gradient(145deg, #f39c12, #f3c687);
+    color: #000;
+    position: relative;
+    overflow: hidden;
+  }
+
+  button:hover {
+    transform: scale(1.1);
+    color: #547e01;
+  }
+
+  button:active::after {
+    content: '';
+    position: absolute;
+    width: 120%;
+    height: 120%;
+    top: -10%;
+    left: -10%;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    animation: clickEffect 0.5s ease;
+  }
+
+  @keyframes clickEffect {
+    0% {transform: scale(0);}
+    50% {transform: scale(1);}
+    100% {transform: scale(1.5); opacity: 0;}
+  }
+
+  .operator {
+    background: linear-gradient(145deg, #9dcd01, #c7ed75);
+  }
+
+  .operator:hover {
+    background: linear-gradient(145deg, #c7f464, #e3fa97);
+  }
+
+  .equal {
+    background: linear-gradient(145deg, #04f4d4, #01c6a4);
+    color: #000;
+    grid-column: span 2;
+  }
+
+  .equal:hover {
+    background: linear-gradient(145deg, #01c6a4, #04f4d4);
+    color: #fff;
+  }
+
+  .clear {
+    background: linear-gradient(145deg, #e74c3c, #f47f74);
+    color: #fff;
+  }
+
+  .clear:hover {
+    background: linear-gradient(145deg, #f39f97, #e74c3c);
+  }
+
+  /* Responsive font for smaller screens */
+  @media screen and (max-width: 360px){
+    .calculator { width: 90%; padding: 20px; }
+    .display { font-size: 1.8rem; padding: 15px; }
+    button { padding: 15px; font-size: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="calculator">
+  <div class="display" id="display">0</div>
+  <div class="buttons">
+    <button class="clear" id="clear">C</button>
+    <button class="operator" data-op="/">÷</button>
+    <button class="operator" data-op="*">×</button>
+    <button class="operator" data-op="-">−</button>
+    <button data-num="7">7</button>
+    <button data-num="8">8</button>
+    <button data-num="9">9</button>
+    <button class="operator" data-op="+">+</button>
+    <button data-num="4">4</button>
+    <button data-num="5">5</button>
+    <button data-num="6">6</button>
+    <button data-num="1">1</button>
+    <button data-num="2">2</button>
+    <button data-num="3">3</button>
+    <button class="equal" id="equals">=</button>
+    <button data-num="0">0</button>
+    <button data-num=".">.</button>
+  </div>
+</div>
+
+<script>
+const display = document.getElementById('display');
+const buttons = document.querySelectorAll('button');
+let currentInput = '';
+
+function updateDisplay(value) {
+  display.textContent = value || '0';
+}
+
+// Button click handling
+buttons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    if(btn.id === 'clear') {
+      currentInput = '';
+      updateDisplay(currentInput);
+    } else if(btn.id === 'equals') {
+      calculateResult();
+    } else if(btn.dataset.num !== undefined) {
+      currentInput += btn.dataset.num;
+      updateDisplay(currentInput);
+    } else if(btn.dataset.op !== undefined) {
+      if(currentInput.slice(-1).match(/[+\-*/]/)) return;
+      currentInput += btn.dataset.op;
+      updateDisplay(currentInput);
+    }
+  });
+});
+
+// Keyboard support
+document.addEventListener('keydown', e => {
+  if(e.key >= '0' && e.key <= '9' || e.key === '.') {
+    currentInput += e.key;
+    updateDisplay(currentInput);
+  } else if(['+', '-', '*', '/'].includes(e.key)) {
+    if(currentInput.slice(-1).match(/[+\-*/]/)) return;
+    currentInput += e.key;
+    updateDisplay(currentInput);
+  } else if(e.key === 'Enter') {
+    calculateResult();
+  } else if(e.key === 'Backspace') {
+    currentInput = currentInput.slice(0, -1);
+    updateDisplay(currentInput);
+  } else if(e.key.toLowerCase() === 'c') {
+    currentInput = '';
+    updateDisplay(currentInput);
+  }
+});
+
+// Calculation
+function calculateResult() {
+  try {
+    if(currentInput === '') return;
+    const result = eval(currentInput);
+    currentInput = result.toString();
+    updateDisplay(currentInput);
+  } catch (err) {
+    updateDisplay('Error');
+    currentInput = '';
+  }
+}
+</script>
+</body>
+</html>
